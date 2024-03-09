@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>贪吃蛇</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="400" style="border:1px solid #000000;"></canvas>
+
+    <!-- 修改数字软键盘输入框 -->
+    <input type="number" id="digitInput" style="width: 100px; font-size: 24px; display: none;">
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let snake = [
+            { x: 10, y: 10 },
+            { x: 9, y: 10 },
+            { x: 8, y: 10 },
+            { x: 7, y: 10 }
+        ];
+        let food = { x: Math.floor(Math.random() * canvas.width), y: Math.floor(Math.random() * canvas.height) };
+        let direction = 'right';
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            snake.forEach((segment, index) => {
+                ctx.fillStyle = index === 0 ? '#FF0000' : '#008000';
+                ctx.fillRect(segment.x, segment.y, 10, 10);
+            });
+            ctx.fillStyle = '#FFF';
+            ctx.fillRect(food.x, food.y, 10, 10);
+            ctx.font = '16px Arial';
+            ctx.fillText(`Score: ${snake.length - 3}`, 20, 20);
+        }
+
+        function update() {
+            const head = snake[0];
+            switch (direction) {
+                case 'right':
+                    head.x += 10;
+                    break;
+                case 'left':
+                    head.x -= 10;
+                    break;
+                case 'up':
+                    head.y -= 10;
+                    break;
+                case 'down':
+                    head.y += 10;
+                    break;
+            }
+
+            if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+                gameOver();
+                return;
+            }
+
+            if (head.x === food.x && head.y === food.y) {
+                food = { x: Math.floor(Math.random() * canvas.width), y: Math.floor(Math.random() * canvas.height) };
+                snake.push({ x: 0, y: 0 });
+            } else {
+                snake.pop();
+            }
+
+            snake.unshift(head);
+        }
+
+        function gameOver() {
+            clearInterval(interval);
+            alert('Game Over!');
+        }
+
+        let interval = setInterval(function () {
+            draw();
+            update();
+        }, 100);
+
+        // 处理键盘和软键盘输入
+        document.addEventListener('keydown', function (event) {
+            switch (event.key) {
+                case 'ArrowRight':
+                case '2':
+                    if (direction !== 'left') direction = 'right';
+                    break;
+                case 'ArrowLeft':
+                case '4':
+                    if (direction !== 'right') direction = 'left';
+                    break;
+                case 'ArrowUp':
+                case '8':
+                    if (direction !== 'down') direction = 'up';
+                    break;
+                case 'ArrowDown':
+                case '6':
+                    if (direction !== 'up') direction = 'down';
+                    break;
+            }
+        });
+
+        // 处理软键盘输入
+        document.addEventListener('touchend', function (event) {
+            if (event.target.id === 'digitInput') {
+                event.preventDefault();
+                switch (event.target.value) {
+                    case '2':
+                    case '4':
+                        if (direction !== 'left') direction = 'right';
+                        break;
+                    case '8':
+                    case '6':
+                        if (direction !== 'down') direction = 'up';
+                        break;
+                    case '3':
+                    case '1':
+                        if (direction !== 'up') direction = 'down';
+                        break;
+                    case '7':
+                    case '9':
+                        if (direction !== 'right') direction = 'left';
+                        break;
+                }
+                event.target.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
